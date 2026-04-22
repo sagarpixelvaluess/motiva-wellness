@@ -56,7 +56,7 @@ const Welcome = () => {
                 <div className="w-24 h-24 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow animate-float">
                   <span className="text-5xl">🤖</span>
                 </div>
-                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-card" />
+                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-card" />
               </div>
             </div>
 

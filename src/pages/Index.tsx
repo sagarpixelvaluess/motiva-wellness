@@ -1,16 +1,24 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { MotivaLogo } from "@/components/MotivaLogo";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (user) navigate("/welcome", { replace: true });
+    else navigate("/auth", { replace: true });
+  }, [user, loading, navigate]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-soft gap-6">
+      <MotivaLogo size="lg" className="animate-float" />
+      <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;

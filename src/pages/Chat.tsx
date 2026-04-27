@@ -531,7 +531,12 @@ const Chat = () => {
                     </span>
                   </div>
                   {messages.map((m) => (
-                    <MessageBubble key={m.id} message={m} />
+                    <MessageBubble
+                      key={m.id}
+                      message={m}
+                      saved={savedIds.has(m.id)}
+                      onToggleBookmark={() => toggleBookmark(m)}
+                    />
                   ))}
                   {streaming && messages[messages.length - 1]?.text === "" && <TypingIndicator />}
                   <div ref={messagesEndRef} />

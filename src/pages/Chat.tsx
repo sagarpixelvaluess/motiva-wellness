@@ -424,7 +424,10 @@ const Chat = () => {
           </div>
         )}
 
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth">
+        <button
+          onClick={() => { setSidebarOpen(false); navigate("/library"); }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth"
+        >
           <Library className="w-5 h-5" />
           Library
         </button>

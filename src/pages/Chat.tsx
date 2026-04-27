@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Plus, History, Library, Settings, Bell, User as UserIcon,
-  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2, ImageIcon
+  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

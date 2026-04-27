@@ -603,6 +603,14 @@ const Chat = () => {
                   data-enable-grammarly="false"
                   className="flex-1 self-center border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 px-2 py-2 leading-6 min-h-[24px] max-h-40 text-base placeholder:text-muted-foreground/70"
                 />
+                <button
+                  type="button"
+                  onClick={handleVoiceClick}
+                  aria-label="Voice input"
+                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth hover:text-primary hover:scale-110 active:scale-95"
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
                 <Button
                   onClick={() => sendMessage(input)}
                   disabled={(!input.trim() && !imageFile) || sending || uploadingImage}

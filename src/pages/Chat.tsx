@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Plus, History, Library, Settings, Bell, User as UserIcon,
-  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2
+  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2,
+  Bookmark, BookmarkCheck, Mic
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ const Chat = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

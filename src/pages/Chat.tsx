@@ -419,10 +419,14 @@ const Chat = () => {
           </div>
 
           {/* Input */}
-          <div className="px-4 sm:px-8 pb-6 pt-2">
+          <div className="px-4 sm:px-6 pb-6 pt-2">
             <div className="max-w-3xl mx-auto">
-              <div className="bg-card rounded-3xl shadow-card flex items-end gap-2 p-2 pl-4">
-                <button className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0">
+              <div className="bg-card rounded-full shadow-card flex items-center gap-2 px-2 py-2 min-h-[60px]">
+                <button
+                  type="button"
+                  aria-label="Attach file"
+                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth"
+                >
                   <Paperclip className="w-5 h-5" />
                 </button>
                 <Textarea
@@ -432,14 +436,18 @@ const Chat = () => {
                   onKeyDown={handleKeyDown}
                   placeholder="Ask anything..."
                   rows={1}
-                  className="flex-1 border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 py-3 max-h-40 text-base"
+                  data-gramm="false"
+                  data-gramm_editor="false"
+                  data-enable-grammarly="false"
+                  className="flex-1 self-center border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 px-2 py-2 leading-6 min-h-[24px] max-h-40 text-base placeholder:text-muted-foreground/70"
                 />
                 <Button
                   onClick={() => sendMessage(input)}
                   disabled={!input.trim() || sending}
-                  className="w-11 h-11 rounded-full bg-gradient-cta hover:opacity-90 p-0 flex-shrink-0 shadow-soft"
+                  aria-label="Send message"
+                  className="w-11 h-11 rounded-full bg-gradient-cta hover:opacity-90 p-0 flex-shrink-0 shadow-soft flex items-center justify-center [&_svg]:size-[18px]"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="w-[18px] h-[18px] translate-x-[1px]" />
                 </Button>
               </div>
               <p className="text-center text-[10px] tracking-widest text-muted-foreground uppercase mt-3">

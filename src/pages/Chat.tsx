@@ -78,6 +78,19 @@ const Chat = () => {
       .then(({ data }) => setMessages((data as Message[]) || []));
   }, [chatId]);
 
+  // Load which messages are bookmarked
+  useEffect(() => {
+    if (!user || !chatId) return;
+    supabase
+      .from("saved_messages")
+      .select("message_id")
+      .eq("user_id", user.id)
+      .eq("chat_id", chatId)
+      .then(({ data }) => {
+        setSavedIds(new Set((data || []).map((r: any) => r.message_id).filter(Boolean)));
+      });
+  }, [user, chatId, messages.length]);
+
   // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

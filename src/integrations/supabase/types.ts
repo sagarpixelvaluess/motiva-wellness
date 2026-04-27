@@ -43,6 +43,7 @@ export type Database = {
           chat_id: string
           created_at: string
           id: string
+          image_url: string | null
           sender: string
           text: string
           user_id: string
@@ -51,6 +52,7 @@ export type Database = {
           chat_id: string
           created_at?: string
           id?: string
+          image_url?: string | null
           sender: string
           text: string
           user_id: string
@@ -59,6 +61,7 @@ export type Database = {
           chat_id?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           sender?: string
           text?: string
           user_id?: string

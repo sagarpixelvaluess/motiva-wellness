@@ -640,56 +640,82 @@ const Chat = () => {
   );
 };
 
-const MessageBubble = ({ message }: { message: Message }) => {
+const MessageBubble = ({
+  message,
+  saved,
+  onToggleBookmark,
+}: {
+  message: Message;
+  saved: boolean;
+  onToggleBookmark: () => void;
+}) => {
   const isUser = message.sender === "user";
   const time = new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const hasImage = !!message.image_url;
   const hasText = !!message.text;
+  const isStreaming = message.id.startsWith("ai-temp") || message.id.startsWith("temp");
 
   return (
-    <div className={cn("flex animate-bubble-in", isUser ? "justify-end" : "justify-start")}>
-      <div
-        className={cn(
-          "max-w-[85%] sm:max-w-[75%] shadow-bubble relative overflow-hidden",
-          isUser
-            ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
-            : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
-          hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
-        )}
-      >
-        {hasImage && (
-          <a
-            href={message.image_url!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
-          >
-            <img
-              src={message.image_url!}
-              alt="Attached"
-              loading="lazy"
-              className="rounded-2xl max-h-72 w-auto object-cover"
-            />
-          </a>
-        )}
-        {hasText && (
-          <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-            {message.text}
-          </div>
-        )}
-        {!hasText && !hasImage && (
-          <Heart className="w-4 h-4 inline animate-pulse text-primary" />
-        )}
+    <div className={cn("flex animate-bubble-in group", isUser ? "justify-end" : "justify-start")}>
+      <div className={cn("flex items-end gap-2 max-w-[90%] sm:max-w-[80%]", isUser ? "flex-row-reverse" : "flex-row")}>
         <div
           className={cn(
-            "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
-            isUser ? "text-right" : "text-left",
-            hasImage && !hasText && "px-2 pb-1"
+            "shadow-bubble relative overflow-hidden",
+            isUser
+              ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
+              : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
+            hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
           )}
         >
-          {time}
+          {hasImage && (
+            <a
+              href={message.image_url!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
+            >
+              <img
+                src={message.image_url!}
+                alt="Attached"
+                loading="lazy"
+                className="rounded-2xl max-h-72 w-auto object-cover"
+              />
+            </a>
+          )}
+          {hasText && (
+            <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+              {message.text}
+            </div>
+          )}
+          {!hasText && !hasImage && (
+            <Heart className="w-4 h-4 inline animate-pulse text-primary" />
+          )}
+          <div
+            className={cn(
+              "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
+              isUser ? "text-right" : "text-left",
+              hasImage && !hasText && "px-2 pb-1"
+            )}
+          >
+            {time}
+          </div>
         </div>
+        {!isStreaming && (hasText || hasImage) && (
+          <button
+            onClick={onToggleBookmark}
+            aria-label={saved ? "Remove bookmark" : "Save to Library"}
+            className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-smooth mb-1",
+              "opacity-0 group-hover:opacity-100 focus:opacity-100",
+              saved
+                ? "bg-primary/15 text-primary opacity-100"
+                : "bg-card text-muted-foreground hover:text-primary hover:bg-primary/10 shadow-bubble"
+            )}
+          >
+            {saved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </div>
   );

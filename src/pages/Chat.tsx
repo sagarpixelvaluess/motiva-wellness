@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Plus, History, Library, Settings, Bell, User as UserIcon,
-  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart
+  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,11 @@ interface Message {
   sender: "user" | "ai";
   text: string;
   created_at: string;
+  image_url?: string | null;
 }
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 interface Chat {
   id: string;
@@ -43,8 +47,12 @@ const Chat = () => {
   const [streaming, setStreaming] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load all chats
   useEffect(() => {
@@ -109,11 +117,68 @@ const Chat = () => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting same file
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Please choose a JPG, PNG or WEBP image");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    setUploadingImage(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("chat-images")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("chat-images").getPublicUrl(path);
+      return data.publicUrl;
+    } catch (err) {
+      console.error(err);
+      toast.error("Image upload failed");
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const sendMessage = async (text: string) => {
-    if (!text.trim() || !user || !chatId || sending) return;
+    if (!user || !chatId || sending) return;
     const userText = text.trim();
+    const hasImage = !!imageFile;
+    if (!userText && !hasImage) return;
+
     setInput("");
     setSending(true);
+
+    // Upload image first (if any)
+    let uploadedUrl: string | null = null;
+    if (imageFile) {
+      uploadedUrl = await uploadImage(imageFile);
+      if (!uploadedUrl) {
+        setSending(false);
+        return;
+      }
+      clearImage();
+    }
 
     // Optimistic user message
     const tempUserMsg: Message = {
@@ -121,13 +186,20 @@ const Chat = () => {
       sender: "user",
       text: userText,
       created_at: new Date().toISOString(),
+      image_url: uploadedUrl,
     };
     setMessages((prev) => [...prev, tempUserMsg]);
 
     // Persist user message
     const { data: savedUser, error: userErr } = await supabase
       .from("messages")
-      .insert({ chat_id: chatId, user_id: user.id, sender: "user", text: userText })
+      .insert({
+        chat_id: chatId,
+        user_id: user.id,
+        sender: "user",
+        text: userText,
+        image_url: uploadedUrl,
+      })
       .select()
       .single();
 
@@ -142,7 +214,7 @@ const Chat = () => {
 
     // Update chat title if first message
     if (messages.length === 0) {
-      const title = userText.slice(0, 40) + (userText.length > 40 ? "…" : "");
+      const title = (userText || "Image").slice(0, 40) + ((userText || "Image").length > 40 ? "…" : "");
       await supabase.from("chats").update({ title, updated_at: new Date().toISOString() }).eq("id", chatId);
       setChats((prev) =>
         [{ ...prev.find((c) => c.id === chatId)!, title, updated_at: new Date().toISOString() },
@@ -158,10 +230,21 @@ const Chat = () => {
     setMessages((prev) => [...prev, { id: aiTempId, sender: "ai", text: "", created_at: new Date().toISOString() }]);
 
     try {
-      const conversationHistory = [...messages, savedUser as Message].map((m) => ({
-        role: m.sender === "user" ? "user" : "assistant",
-        content: m.text,
-      }));
+      const conversationHistory = [...messages, savedUser as Message].map((m) => {
+        if (m.sender === "user" && m.image_url) {
+          return {
+            role: "user",
+            content: [
+              { type: "image_url", image_url: { url: m.image_url } },
+              { type: "text", text: m.text || "What's in this image?" },
+            ],
+          };
+        }
+        return {
+          role: m.sender === "user" ? "user" : "assistant",
+          content: m.text,
+        };
+      });
 
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
       const resp = await fetch(CHAT_URL, {
@@ -421,11 +504,51 @@ const Chat = () => {
           {/* Input */}
           <div className="px-4 sm:px-6 pb-6 pt-2">
             <div className="max-w-3xl mx-auto">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+
+              {imagePreview && (
+                <div className="bg-card rounded-2xl shadow-bubble p-2 mb-2 flex items-center gap-3 max-w-xs animate-fade-up">
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-accent flex-shrink-0">
+                    <img src={imagePreview} alt="Selected" className="w-full h-full object-cover" />
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
+                        <Loader2 className="w-5 h-5 text-background animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground truncate">
+                      {imageFile?.name || "Image"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {uploadingImage ? "Uploading…" : "Ready to send"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    disabled={uploadingImage}
+                    aria-label="Remove image"
+                    className="w-7 h-7 rounded-full bg-accent hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center transition-smooth flex-shrink-0 disabled:opacity-50"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               <div className="bg-card rounded-full shadow-card flex items-center gap-2 px-2 py-2 min-h-[60px]">
                 <button
                   type="button"
-                  aria-label="Attach file"
-                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending || !!imageFile}
+                  aria-label="Attach image"
+                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Paperclip className="w-5 h-5" />
                 </button>
@@ -434,7 +557,7 @@ const Chat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything..."
+                  placeholder={imageFile ? "Add a message about the image..." : "Ask anything..."}
                   rows={1}
                   data-gramm="false"
                   data-gramm_editor="false"
@@ -443,11 +566,15 @@ const Chat = () => {
                 />
                 <Button
                   onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || sending}
+                  disabled={(!input.trim() && !imageFile) || sending || uploadingImage}
                   aria-label="Send message"
                   className="w-11 h-11 rounded-full bg-gradient-cta hover:opacity-90 p-0 flex-shrink-0 shadow-soft flex items-center justify-center [&_svg]:size-[18px]"
                 >
-                  <Send className="w-[18px] h-[18px] translate-x-[1px]" />
+                  {uploadingImage || sending ? (
+                    <Loader2 className="w-[18px] h-[18px] animate-spin" />
+                  ) : (
+                    <Send className="w-[18px] h-[18px] translate-x-[1px]" />
+                  )}
                 </Button>
               </div>
               <p className="text-center text-[10px] tracking-widest text-muted-foreground uppercase mt-3">
@@ -465,20 +592,50 @@ const MessageBubble = ({ message }: { message: Message }) => {
   const isUser = message.sender === "user";
   const time = new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  const hasImage = !!message.image_url;
+  const hasText = !!message.text;
+
   return (
     <div className={cn("flex animate-bubble-in", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[85%] sm:max-w-[75%] px-5 py-3.5 shadow-bubble relative",
+          "max-w-[85%] sm:max-w-[75%] shadow-bubble relative overflow-hidden",
           isUser
             ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
-            : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40"
+            : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
+          hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
         )}
       >
-        <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-          {message.text || <Heart className="w-4 h-4 inline animate-pulse text-primary" />}
-        </div>
-        <div className={cn("text-[10px] mt-1.5 tracking-wider uppercase opacity-60", isUser ? "text-right" : "text-left")}>
+        {hasImage && (
+          <a
+            href={message.image_url!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
+          >
+            <img
+              src={message.image_url!}
+              alt="Attached"
+              loading="lazy"
+              className="rounded-2xl max-h-72 w-auto object-cover"
+            />
+          </a>
+        )}
+        {hasText && (
+          <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+            {message.text}
+          </div>
+        )}
+        {!hasText && !hasImage && (
+          <Heart className="w-4 h-4 inline animate-pulse text-primary" />
+        )}
+        <div
+          className={cn(
+            "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
+            isUser ? "text-right" : "text-left",
+            hasImage && !hasText && "px-2 pb-1"
+          )}
+        >
           {time}
         </div>
       </div>

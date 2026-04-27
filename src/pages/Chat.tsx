@@ -592,20 +592,50 @@ const MessageBubble = ({ message }: { message: Message }) => {
   const isUser = message.sender === "user";
   const time = new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  const hasImage = !!message.image_url;
+  const hasText = !!message.text;
+
   return (
     <div className={cn("flex animate-bubble-in", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[85%] sm:max-w-[75%] px-5 py-3.5 shadow-bubble relative",
+          "max-w-[85%] sm:max-w-[75%] shadow-bubble relative overflow-hidden",
           isUser
             ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
-            : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40"
+            : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
+          hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
         )}
       >
-        <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-          {message.text || <Heart className="w-4 h-4 inline animate-pulse text-primary" />}
-        </div>
-        <div className={cn("text-[10px] mt-1.5 tracking-wider uppercase opacity-60", isUser ? "text-right" : "text-left")}>
+        {hasImage && (
+          <a
+            href={message.image_url!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
+          >
+            <img
+              src={message.image_url!}
+              alt="Attached"
+              loading="lazy"
+              className="rounded-2xl max-h-72 w-auto object-cover"
+            />
+          </a>
+        )}
+        {hasText && (
+          <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+            {message.text}
+          </div>
+        )}
+        {!hasText && !hasImage && (
+          <Heart className="w-4 h-4 inline animate-pulse text-primary" />
+        )}
+        <div
+          className={cn(
+            "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
+            isUser ? "text-right" : "text-left",
+            hasImage && !hasText && "px-2 pb-1"
+          )}
+        >
           {time}
         </div>
       </div>

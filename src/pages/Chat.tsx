@@ -17,7 +17,11 @@ interface Message {
   sender: "user" | "ai";
   text: string;
   created_at: string;
+  image_url?: string | null;
 }
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 interface Chat {
   id: string;

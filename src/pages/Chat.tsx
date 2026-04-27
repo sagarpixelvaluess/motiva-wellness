@@ -346,6 +346,27 @@ const Chat = () => {
     }
   };
 
+  const toggleBookmark = async (m: Message) => {
+    if (!user || !chatId || m.id.startsWith("temp") || m.id.startsWith("ai-temp")) return;
+    if (savedIds.has(m.id)) {
+      await supabase.from("saved_messages").delete().eq("user_id", user.id).eq("message_id", m.id);
+      setSavedIds((p) => { const n = new Set(p); n.delete(m.id); return n; });
+      toast.success("Removed from Library");
+    } else {
+      const { error } = await supabase.from("saved_messages").insert({
+        user_id: user.id, message_id: m.id, chat_id: chatId,
+        sender: m.sender, text: m.text, image_url: m.image_url,
+      });
+      if (error) return toast.error("Could not save");
+      setSavedIds((p) => new Set(p).add(m.id));
+      toast.success("Saved to Library");
+    }
+  };
+
+  const handleVoiceClick = () => {
+    toast.info("Voice feature coming soon", { description: "We're working on bringing voice chat to Motiva." });
+  };
+
   const isEmpty = messages.length === 0 && !streaming;
 
   const Sidebar = (

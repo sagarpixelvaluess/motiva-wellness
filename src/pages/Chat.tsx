@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Plus, History, Library, Settings, Bell, User as UserIcon,
-  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2
+  Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2,
+  Bookmark, BookmarkCheck, Mic
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ const Chat = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +77,19 @@ const Chat = () => {
       .order("created_at", { ascending: true })
       .then(({ data }) => setMessages((data as Message[]) || []));
   }, [chatId]);
+
+  // Load which messages are bookmarked
+  useEffect(() => {
+    if (!user || !chatId) return;
+    supabase
+      .from("saved_messages")
+      .select("message_id")
+      .eq("user_id", user.id)
+      .eq("chat_id", chatId)
+      .then(({ data }) => {
+        setSavedIds(new Set((data || []).map((r: any) => r.message_id).filter(Boolean)));
+      });
+  }, [user, chatId, messages.length]);
 
   // Auto-scroll
   useEffect(() => {
@@ -331,6 +346,27 @@ const Chat = () => {
     }
   };
 
+  const toggleBookmark = async (m: Message) => {
+    if (!user || !chatId || m.id.startsWith("temp") || m.id.startsWith("ai-temp")) return;
+    if (savedIds.has(m.id)) {
+      await supabase.from("saved_messages").delete().eq("user_id", user.id).eq("message_id", m.id);
+      setSavedIds((p) => { const n = new Set(p); n.delete(m.id); return n; });
+      toast.success("Removed from Library");
+    } else {
+      const { error } = await supabase.from("saved_messages").insert({
+        user_id: user.id, message_id: m.id, chat_id: chatId,
+        sender: m.sender, text: m.text, image_url: m.image_url,
+      });
+      if (error) return toast.error("Could not save");
+      setSavedIds((p) => new Set(p).add(m.id));
+      toast.success("Saved to Library");
+    }
+  };
+
+  const handleVoiceClick = () => {
+    toast.info("Voice feature coming soon", { description: "We're working on bringing voice chat to Motiva." });
+  };
+
   const isEmpty = messages.length === 0 && !streaming;
 
   const Sidebar = (
@@ -388,7 +424,10 @@ const Chat = () => {
           </div>
         )}
 
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth">
+        <button
+          onClick={() => { setSidebarOpen(false); navigate("/library"); }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth"
+        >
           <Library className="w-5 h-5" />
           Library
         </button>
@@ -492,7 +531,12 @@ const Chat = () => {
                     </span>
                   </div>
                   {messages.map((m) => (
-                    <MessageBubble key={m.id} message={m} />
+                    <MessageBubble
+                      key={m.id}
+                      message={m}
+                      saved={savedIds.has(m.id)}
+                      onToggleBookmark={() => toggleBookmark(m)}
+                    />
                   ))}
                   {streaming && messages[messages.length - 1]?.text === "" && <TypingIndicator />}
                   <div ref={messagesEndRef} />
@@ -564,6 +608,14 @@ const Chat = () => {
                   data-enable-grammarly="false"
                   className="flex-1 self-center border-0 bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0 px-2 py-2 leading-6 min-h-[24px] max-h-40 text-base placeholder:text-muted-foreground/70"
                 />
+                <button
+                  type="button"
+                  onClick={handleVoiceClick}
+                  aria-label="Voice input"
+                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth hover:text-primary hover:scale-110 active:scale-95"
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
                 <Button
                   onClick={() => sendMessage(input)}
                   disabled={(!input.trim() && !imageFile) || sending || uploadingImage}
@@ -588,56 +640,82 @@ const Chat = () => {
   );
 };
 
-const MessageBubble = ({ message }: { message: Message }) => {
+const MessageBubble = ({
+  message,
+  saved,
+  onToggleBookmark,
+}: {
+  message: Message;
+  saved: boolean;
+  onToggleBookmark: () => void;
+}) => {
   const isUser = message.sender === "user";
   const time = new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const hasImage = !!message.image_url;
   const hasText = !!message.text;
+  const isStreaming = message.id.startsWith("ai-temp") || message.id.startsWith("temp");
 
   return (
-    <div className={cn("flex animate-bubble-in", isUser ? "justify-end" : "justify-start")}>
-      <div
-        className={cn(
-          "max-w-[85%] sm:max-w-[75%] shadow-bubble relative overflow-hidden",
-          isUser
-            ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
-            : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
-          hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
-        )}
-      >
-        {hasImage && (
-          <a
-            href={message.image_url!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
-          >
-            <img
-              src={message.image_url!}
-              alt="Attached"
-              loading="lazy"
-              className="rounded-2xl max-h-72 w-auto object-cover"
-            />
-          </a>
-        )}
-        {hasText && (
-          <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-            {message.text}
-          </div>
-        )}
-        {!hasText && !hasImage && (
-          <Heart className="w-4 h-4 inline animate-pulse text-primary" />
-        )}
+    <div className={cn("flex animate-bubble-in group", isUser ? "justify-end" : "justify-start")}>
+      <div className={cn("flex items-end gap-2 max-w-[90%] sm:max-w-[80%]", isUser ? "flex-row-reverse" : "flex-row")}>
         <div
           className={cn(
-            "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
-            isUser ? "text-right" : "text-left",
-            hasImage && !hasText && "px-2 pb-1"
+            "shadow-bubble relative overflow-hidden",
+            isUser
+              ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
+              : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
+            hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
           )}
         >
-          {time}
+          {hasImage && (
+            <a
+              href={message.image_url!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
+            >
+              <img
+                src={message.image_url!}
+                alt="Attached"
+                loading="lazy"
+                className="rounded-2xl max-h-72 w-auto object-cover"
+              />
+            </a>
+          )}
+          {hasText && (
+            <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+              {message.text}
+            </div>
+          )}
+          {!hasText && !hasImage && (
+            <Heart className="w-4 h-4 inline animate-pulse text-primary" />
+          )}
+          <div
+            className={cn(
+              "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
+              isUser ? "text-right" : "text-left",
+              hasImage && !hasText && "px-2 pb-1"
+            )}
+          >
+            {time}
+          </div>
         </div>
+        {!isStreaming && (hasText || hasImage) && (
+          <button
+            onClick={onToggleBookmark}
+            aria-label={saved ? "Remove bookmark" : "Save to Library"}
+            className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-smooth mb-1",
+              "opacity-0 group-hover:opacity-100 focus:opacity-100",
+              saved
+                ? "bg-primary/15 text-primary opacity-100"
+                : "bg-card text-muted-foreground hover:text-primary hover:bg-primary/10 shadow-bubble"
+            )}
+          >
+            {saved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      collections: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           chat_id: string
@@ -76,6 +100,44 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          collection_id: string | null
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          collection_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          collection_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -96,6 +158,50 @@ export type Database = {
           name?: string | null
         }
         Relationships: []
+      }
+      saved_messages: {
+        Row: {
+          chat_id: string | null
+          collection_id: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          message_id: string | null
+          sender: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          chat_id?: string | null
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message_id?: string | null
+          sender: string
+          text?: string
+          user_id: string
+        }
+        Update: {
+          chat_id?: string | null
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          message_id?: string | null
+          sender?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_messages_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

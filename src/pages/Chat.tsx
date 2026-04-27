@@ -504,11 +504,51 @@ const Chat = () => {
           {/* Input */}
           <div className="px-4 sm:px-6 pb-6 pt-2">
             <div className="max-w-3xl mx-auto">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+
+              {imagePreview && (
+                <div className="bg-card rounded-2xl shadow-bubble p-2 mb-2 flex items-center gap-3 max-w-xs animate-fade-up">
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-accent flex-shrink-0">
+                    <img src={imagePreview} alt="Selected" className="w-full h-full object-cover" />
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-foreground/40 flex items-center justify-center">
+                        <Loader2 className="w-5 h-5 text-background animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground truncate">
+                      {imageFile?.name || "Image"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {uploadingImage ? "Uploading…" : "Ready to send"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    disabled={uploadingImage}
+                    aria-label="Remove image"
+                    className="w-7 h-7 rounded-full bg-accent hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center transition-smooth flex-shrink-0 disabled:opacity-50"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               <div className="bg-card rounded-full shadow-card flex items-center gap-2 px-2 py-2 min-h-[60px]">
                 <button
                   type="button"
-                  aria-label="Attach file"
-                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending || !!imageFile}
+                  aria-label="Attach image"
+                  className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground flex-shrink-0 transition-smooth disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Paperclip className="w-5 h-5" />
                 </button>
@@ -517,7 +557,7 @@ const Chat = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything..."
+                  placeholder={imageFile ? "Add a message about the image..." : "Ask anything..."}
                   rows={1}
                   data-gramm="false"
                   data-gramm_editor="false"
@@ -526,11 +566,15 @@ const Chat = () => {
                 />
                 <Button
                   onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || sending}
+                  disabled={(!input.trim() && !imageFile) || sending || uploadingImage}
                   aria-label="Send message"
                   className="w-11 h-11 rounded-full bg-gradient-cta hover:opacity-90 p-0 flex-shrink-0 shadow-soft flex items-center justify-center [&_svg]:size-[18px]"
                 >
-                  <Send className="w-[18px] h-[18px] translate-x-[1px]" />
+                  {uploadingImage || sending ? (
+                    <Loader2 className="w-[18px] h-[18px] animate-spin" />
+                  ) : (
+                    <Send className="w-[18px] h-[18px] translate-x-[1px]" />
+                  )}
                 </Button>
               </div>
               <p className="text-center text-[10px] tracking-widest text-muted-foreground uppercase mt-3">

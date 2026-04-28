@@ -12,6 +12,7 @@ import Welcome from "./pages/Welcome.tsx";
 import Chat from "./pages/Chat.tsx";
 import SettingsPage from "./pages/Settings.tsx";
 import LibraryPage from "./pages/Library.tsx";
+import HistoryPage from "./pages/History.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
             <Route path="/chat/:chatId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/library" element={<ProtectedRoute><LibraryPage /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

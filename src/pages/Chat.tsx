@@ -379,56 +379,88 @@ const Chat = () => {
 
   const isEmpty = messages.length === 0 && !streaming;
 
-  const Sidebar = (
-    <aside className="w-72 bg-sidebar border-r border-sidebar-border flex flex-col h-full">
-      <div className="p-6">
-        <h2 className="font-display text-xl font-bold text-primary">Intelligence</h2>
-        <p className="text-xs text-muted-foreground mt-1">Calm Mode Active</p>
-      </div>
+  const navItems = [
+    { icon: History, label: "History", onClick: () => { setSidebarOpen(false); navigate("/history"); } },
+    { icon: Library, label: "Library", onClick: () => { setSidebarOpen(false); navigate("/library"); } },
+    { icon: Settings, label: "Settings", onClick: () => { setSidebarOpen(false); navigate("/settings"); } },
+  ];
 
-      <nav className="px-4 space-y-1 flex-1 overflow-y-auto">
-        <button
-          onClick={createNewChat}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/10 text-primary font-semibold transition-smooth hover:bg-primary/15"
-        >
-          <Plus className="w-5 h-5" />
-          New Chat
-        </button>
+  const SidebarContent = ({ collapsed, inDrawer = false }: { collapsed: boolean; inDrawer?: boolean }) => (
+    <TooltipProvider delayDuration={150}>
+      <aside
+        className={cn(
+          "bg-sidebar border-r border-sidebar-border flex flex-col h-full transition-[width] duration-300 ease-in-out overflow-hidden",
+          collapsed ? "w-[72px]" : "w-72"
+        )}
+      >
+        <div className={cn("p-6 transition-all duration-300", collapsed && "px-3 py-5 text-center")}>
+          {collapsed ? (
+            <div className="w-10 h-10 mx-auto rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+          ) : (
+            <>
+              <h2 className="font-display text-xl font-bold text-primary">Intelligence</h2>
+              <p className="text-xs text-muted-foreground mt-1">Calm Mode Active</p>
+            </>
+          )}
+        </div>
 
-        <button
-          onClick={() => { setSidebarOpen(false); navigate("/history"); }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth"
-        >
-          <History className="w-5 h-5" />
-          History
-        </button>
+        <nav className={cn("space-y-1 flex-1 overflow-y-auto overflow-x-hidden", collapsed ? "px-2" : "px-4")}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={createNewChat}
+                className={cn(
+                  "w-full flex items-center rounded-2xl bg-primary/10 text-primary font-semibold transition-all hover:bg-primary/15 hover:scale-[1.02]",
+                  collapsed ? "justify-center h-11" : "gap-3 px-4 py-3"
+                )}
+              >
+                <Plus className="w-5 h-5 shrink-0" />
+                {!collapsed && <span>New Chat</span>}
+              </button>
+            </TooltipTrigger>
+            {collapsed && !inDrawer && <TooltipContent side="right">New Chat</TooltipContent>}
+          </Tooltip>
 
-        <button
-          onClick={() => { setSidebarOpen(false); navigate("/library"); }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth"
-        >
-          <Library className="w-5 h-5" />
-          Library
-        </button>
-        <button
-          onClick={() => navigate("/settings")}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth"
-        >
-          <Settings className="w-5 h-5" />
-          Settings
-        </button>
-      </nav>
+          {navItems.map(({ icon: Icon, label, onClick }) => (
+            <Tooltip key={label}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={onClick}
+                  className={cn(
+                    "w-full flex items-center rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-all hover:translate-x-0.5",
+                    collapsed ? "justify-center h-11" : "gap-3 px-4 py-3"
+                  )}
+                >
+                  <Icon className="w-5 h-5 shrink-0" />
+                  {!collapsed && <span>{label}</span>}
+                </button>
+              </TooltipTrigger>
+              {collapsed && !inDrawer && <TooltipContent side="right">{label}</TooltipContent>}
+            </Tooltip>
+          ))}
+        </nav>
 
-      <div className="p-4">
-        <button
-          onClick={signOut}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-cta text-primary-foreground font-semibold shadow-soft hover:opacity-90 transition-smooth"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign out
-        </button>
-      </div>
-    </aside>
+        <div className={cn("transition-all", collapsed ? "p-2" : "p-4")}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={signOut}
+                className={cn(
+                  "w-full flex items-center justify-center rounded-2xl bg-gradient-cta text-primary-foreground font-semibold shadow-soft hover:opacity-90 transition-smooth",
+                  collapsed ? "h-11" : "gap-2 py-3"
+                )}
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                {!collapsed && <span>Sign out</span>}
+              </button>
+            </TooltipTrigger>
+            {collapsed && !inDrawer && <TooltipContent side="right">Sign out</TooltipContent>}
+          </Tooltip>
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 
   return (
@@ -438,41 +470,67 @@ const Chat = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center"
+            className="md:hidden w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center transition-smooth"
+            aria-label="Open menu"
           >
             <Menu className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            className="hidden md:flex w-10 h-10 rounded-full hover:bg-accent items-center justify-center text-muted-foreground transition-all hover:text-foreground"
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? (
+              <PanelLeftOpen className="w-5 h-5 transition-transform duration-300" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5 transition-transform duration-300" />
+            )}
           </button>
           <MotivaLogo size="md" />
           <div className="hidden sm:block w-2 h-2 rounded-full bg-primary animate-pulse" />
         </div>
         <div className="flex items-center gap-2">
-          <button className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground">
+          <button className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground transition-smooth">
             <Bell className="w-5 h-5" />
           </button>
           <UserAvatar size={40} onClick={() => navigate("/settings")} />
-
         </div>
       </header>
 
       <div className="flex-1 flex overflow-hidden">
         {/* Desktop sidebar */}
-        <div className="hidden md:flex">{Sidebar}</div>
+        <div className="hidden md:flex">
+          <SidebarContent collapsed={sidebarCollapsed} />
+        </div>
 
-        {/* Mobile sidebar */}
-        {sidebarOpen && (
-          <div className="md:hidden fixed inset-0 z-50 flex">
-            <div className="flex-1 bg-foreground/40" onClick={() => setSidebarOpen(false)} />
-            <div className="w-72 bg-sidebar relative">
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-accent flex items-center justify-center"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              {Sidebar}
-            </div>
+        {/* Mobile sidebar (overlay drawer) */}
+        <div
+          className={cn(
+            "md:hidden fixed inset-0 z-50 flex transition-opacity duration-300",
+            sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          )}
+        >
+          <div
+            className="flex-1 bg-foreground/40 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div
+            className={cn(
+              "relative shadow-2xl transition-transform duration-300 ease-in-out",
+              sidebarOpen ? "translate-x-0" : "translate-x-full"
+            )}
+          >
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-accent flex items-center justify-center hover:bg-accent/80 transition-smooth"
+              aria-label="Close menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <SidebarContent collapsed={false} inDrawer />
           </div>
-        )}
+        </div>
 
         {/* Chat Area */}
         <main className="flex-1 flex flex-col overflow-hidden">

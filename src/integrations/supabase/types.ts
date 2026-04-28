@@ -140,22 +140,37 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          daily_checkins_enabled: boolean
+          dark_mode: boolean
           email: string | null
           id: string
           name: string | null
+          notifications_enabled: boolean
+          sound_enabled: boolean
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          daily_checkins_enabled?: boolean
+          dark_mode?: boolean
           email?: string | null
           id: string
           name?: string | null
+          notifications_enabled?: boolean
+          sound_enabled?: boolean
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          daily_checkins_enabled?: boolean
+          dark_mode?: boolean
           email?: string | null
           id?: string
           name?: string | null
+          notifications_enabled?: boolean
+          sound_enabled?: boolean
         }
         Relationships: []
       }

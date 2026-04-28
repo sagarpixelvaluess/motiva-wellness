@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { supabase } from "@/integrations/supabase/client";
 import { MotivaLogo } from "@/components/MotivaLogo";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ interface Prefs {
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
+  const { setAvatarUrl: syncAvatar, setName: syncName } = useProfile();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -97,6 +99,7 @@ const SettingsPage = () => {
       const { error: dbErr } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
       if (dbErr) throw dbErr;
       setAvatarUrl(url);
+      syncAvatar(url);
       toast.success("Photo updated");
     } catch (err) {
       console.error(err);
@@ -113,7 +116,10 @@ const SettingsPage = () => {
     const { error } = await supabase.from("profiles").update({ name: name.trim() }).eq("id", user.id);
     setSaving(false);
     if (error) toast.error("Could not save");
-    else toast.success("Profile saved 💙");
+    else {
+      syncName(name.trim());
+      toast.success("Profile saved 💙");
+    }
   };
 
   const updatePref = async (key: keyof Prefs, value: boolean) => {

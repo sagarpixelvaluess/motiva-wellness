@@ -10,6 +10,7 @@ import {
   Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2,
   Bookmark, BookmarkCheck, Mic
 } from "lucide-react";
+import { UserAvatar } from "@/components/UserAvatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -439,9 +440,8 @@ const Chat = () => {
           <button className="w-10 h-10 rounded-full hover:bg-accent flex items-center justify-center text-muted-foreground">
             <Bell className="w-5 h-5" />
           </button>
-          <button className="w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center">
-            <UserIcon className="w-5 h-5" />
-          </button>
+          <UserAvatar size={40} onClick={() => navigate("/settings")} />
+
         </div>
       </header>
 

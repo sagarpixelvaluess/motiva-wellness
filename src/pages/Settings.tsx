@@ -123,7 +123,7 @@ const SettingsPage = () => {
       if (value) document.documentElement.classList.add("dark");
       else document.documentElement.classList.remove("dark");
     }
-    const { error } = await supabase.from("profiles").update({ [key]: value }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ [key]: value } as any).eq("id", user.id);
     if (error) toast.error("Could not save preference");
   };
 

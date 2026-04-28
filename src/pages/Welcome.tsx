@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MotivaLogo } from "@/components/MotivaLogo";
 import { Button } from "@/components/ui/button";
 import { Bell, Sparkles, Lock, MessageCircle, Shield, User as UserIcon } from "lucide-react";
+import { UserAvatar } from "@/components/UserAvatar";
 
 const Welcome = () => {
   const { user } = useAuth();
@@ -42,9 +43,8 @@ const Welcome = () => {
           <button className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-smooth shadow-soft">
             <Bell className="w-5 h-5" />
           </button>
-          <button className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center text-background shadow-soft">
-            <UserIcon className="w-5 h-5" />
-          </button>
+          <UserAvatar size={40} onClick={() => navigate("/settings")} />
+
         </div>
       </header>
 

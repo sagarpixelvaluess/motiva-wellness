@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Plus, History, Library, Settings, Bell, User as UserIcon,
   Send, Paperclip, Sparkles, Trash2, LogOut, Menu, X, Heart, Loader2,
-  Bookmark, BookmarkCheck, Mic
+  Bookmark, BookmarkCheck, Mic, PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { UserAvatar } from "@/components/UserAvatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

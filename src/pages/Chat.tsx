@@ -386,43 +386,12 @@ const Chat = () => {
         </button>
 
         <button
-          onClick={() => setShowHistory(!showHistory)}
+          onClick={() => { setSidebarOpen(false); navigate("/history"); }}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sidebar-foreground hover:bg-sidebar-accent transition-smooth"
         >
           <History className="w-5 h-5" />
           History
         </button>
-
-        {showHistory && (
-          <div className="ml-2 space-y-1 max-h-64 overflow-y-auto">
-            {chats.length === 0 && (
-              <p className="text-xs text-muted-foreground px-4 py-2">No chats yet</p>
-            )}
-            {chats.map((c) => (
-              <div
-                key={c.id}
-                onClick={() => {
-                  setSidebarOpen(false);
-                  navigate(`/chat/${c.id}`);
-                }}
-                className={cn(
-                  "group flex items-center justify-between gap-2 px-4 py-2 rounded-xl cursor-pointer transition-smooth text-sm",
-                  c.id === chatId
-                    ? "bg-primary/15 text-primary"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent"
-                )}
-              >
-                <span className="truncate flex-1">{c.title}</span>
-                <button
-                  onClick={(e) => deleteChat(c.id, e)}
-                  className="opacity-0 group-hover:opacity-100 transition-smooth text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
 
         <button
           onClick={() => { setSidebarOpen(false); navigate("/library"); }}

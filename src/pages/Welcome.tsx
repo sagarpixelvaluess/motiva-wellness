@@ -48,7 +48,7 @@ const Welcome = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="relative z-10 flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md animate-fade-up">
           <div className="bg-card rounded-3xl shadow-card p-8 sm:p-10">
             <div className="flex justify-center mb-6">

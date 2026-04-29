@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { MotivaLogo } from "@/components/MotivaLogo";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import loginBg from "@/assets/login-sunrise.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,13 +34,22 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-wellness wellness-orbs p-6 overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
+      {/* Blurred background image */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center scale-110"
+        style={{ backgroundImage: `url(${loginBg})`, filter: "blur(20px)", opacity: 0.4 }}
+      />
+      {/* Soft white overlay for readability */}
+      <div aria-hidden className="absolute inset-0 bg-white/60" />
+
       <div className="relative z-10 w-full max-w-md animate-fade-up">
         <div className="flex justify-center mb-8">
           <MotivaLogo size="lg" />
         </div>
 
-        <div className="bg-card rounded-3xl shadow-card p-8 sm:p-10">
+        <div className="rounded-3xl p-8 sm:p-10 bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_20px_60px_-20px_hsl(220_40%_30%/0.25)]">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-display font-bold text-foreground mb-2">Welcome Back</h1>
             <p className="text-muted-foreground">Login to continue your journey</p>

@@ -39,13 +39,18 @@ const Signup = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Blurred clouds background */}
+      {/* Layer 1: Background image */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-cover bg-center scale-110"
-        style={{ backgroundImage: `url(${signupBg})`, filter: "blur(20px)", opacity: 0.4 }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${signupBg})` }}
       />
-      <div aria-hidden className="absolute inset-0 bg-white/60" />
+      {/* Layer 2: Overlay + backdrop blur */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-white/50"
+        style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+      />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-10">
         <MotivaLogo size="md" />

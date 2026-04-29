@@ -568,14 +568,19 @@ const Chat = () => {
                       Today
                     </span>
                   </div>
-                  {messages.map((m) => (
-                    <MessageBubble
-                      key={m.id}
-                      message={m}
-                      saved={savedIds.has(m.id)}
-                      onToggleBookmark={() => toggleBookmark(m)}
-                    />
-                  ))}
+                  {messages.map((m, idx) => {
+                    const isLast = idx === messages.length - 1;
+                    const isStreamingThis = streaming && isLast && m.sender === "ai";
+                    return (
+                      <MessageBubble
+                        key={m.id}
+                        message={m}
+                        saved={savedIds.has(m.id)}
+                        onToggleBookmark={() => toggleBookmark(m)}
+                        isStreaming={isStreamingThis}
+                      />
+                    );
+                  })}
                   {streaming && messages[messages.length - 1]?.text === "" && <TypingIndicator />}
                   <div ref={messagesEndRef} />
                 </div>

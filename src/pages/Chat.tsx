@@ -683,80 +683,23 @@ const Chat = () => {
   );
 };
 
-// Lightweight inline formatter: **bold**, lists, paragraphs
-const renderFormatted = (text: string) => {
-  const lines = text.split("\n");
-  const blocks: JSX.Element[] = [];
-  let listBuf: { type: "ul" | "ol"; items: string[] } | null = null;
-  let paraBuf: string[] = [];
-
-  const flushPara = (key: string) => {
-    if (paraBuf.length) {
-      blocks.push(<p key={key}>{renderInline(paraBuf.join(" "))}</p>);
-      paraBuf = [];
-    }
-  };
-  const flushList = (key: string) => {
-    if (listBuf) {
-      const Tag = listBuf.type;
-      blocks.push(
-        <Tag key={key}>
-          {listBuf.items.map((it, i) => (
-            <li key={i}>{renderInline(it)}</li>
-          ))}
-        </Tag>
-      );
-      listBuf = null;
-    }
-  };
-
-  lines.forEach((raw, i) => {
-    const line = raw.trimEnd();
-    const ulMatch = line.match(/^\s*[-*]\s+(.*)/);
-    const olMatch = line.match(/^\s*\d+\.\s+(.*)/);
-    if (ulMatch) {
-      flushPara(`p-${i}`);
-      if (!listBuf || listBuf.type !== "ul") { flushList(`l-${i}`); listBuf = { type: "ul", items: [] }; }
-      listBuf.items.push(ulMatch[1]);
-    } else if (olMatch) {
-      flushPara(`p-${i}`);
-      if (!listBuf || listBuf.type !== "ol") { flushList(`l-${i}`); listBuf = { type: "ol", items: [] }; }
-      listBuf.items.push(olMatch[1]);
-    } else if (line.trim() === "") {
-      flushPara(`p-${i}`);
-      flushList(`l-${i}`);
-    } else {
-      flushList(`l-${i}`);
-      paraBuf.push(line);
-    }
-  });
-  flushPara("p-end");
-  flushList("l-end");
-  return blocks;
-};
-
-const renderInline = (text: string) => {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((p, i) =>
-    p.startsWith("**") && p.endsWith("**") ? <strong key={i}>{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>
-  );
-};
-
 const MessageBubble = ({
   message,
   saved,
   onToggleBookmark,
+  isStreaming = false,
 }: {
   message: Message;
   saved: boolean;
   onToggleBookmark: () => void;
+  isStreaming?: boolean;
 }) => {
   const isUser = message.sender === "user";
   const time = new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const hasImage = !!message.image_url;
   const hasText = !!message.text;
-  const isStreaming = message.id.startsWith("ai-temp") || message.id.startsWith("temp");
+  const isOptimistic = message.id.startsWith("ai-temp") || message.id.startsWith("temp");
 
   return (
     <div className={cn("flex animate-fade-up group", isUser ? "justify-end" : "justify-start")}>
@@ -787,23 +730,31 @@ const MessageBubble = ({
           )}
           {hasText && (
             <div className="prose-chat text-[15px]">
-              {renderFormatted(message.text)}
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+              {isStreaming && (
+                <span
+                  className="inline-block w-[2px] h-[1em] align-[-2px] ml-0.5 bg-primary animate-pulse"
+                  aria-hidden
+                />
+              )}
             </div>
           )}
           {!hasText && !hasImage && (
             <Heart className="w-4 h-4 inline animate-pulse text-primary" />
           )}
-          <div
-            className={cn(
-              "text-[10px] mt-1.5 tracking-wider uppercase opacity-50",
-              isUser ? "text-right" : "text-left",
-              hasImage && !hasText && "px-2 pb-1"
-            )}
-          >
-            {time}
-          </div>
+          {!isStreaming && (
+            <div
+              className={cn(
+                "text-[10px] mt-1.5 tracking-wider uppercase opacity-50",
+                isUser ? "text-right" : "text-left",
+                hasImage && !hasText && "px-2 pb-1"
+              )}
+            >
+              {time}
+            </div>
+          )}
         </div>
-        {!isStreaming && (hasText || hasImage) && (
+        {!isOptimistic && !isStreaming && (hasText || hasImage) && (
           <button
             onClick={onToggleBookmark}
             aria-label={saved ? "Remove bookmark" : "Save to Library"}

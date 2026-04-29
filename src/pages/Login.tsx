@@ -35,14 +35,18 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden">
-      {/* Blurred background image */}
+      {/* Layer 1: Background image (sharp, full cover) */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-cover bg-center scale-110"
-        style={{ backgroundImage: `url(${loginBg})`, filter: "blur(20px)", opacity: 0.4 }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${loginBg})` }}
       />
-      {/* Soft white overlay for readability */}
-      <div aria-hidden className="absolute inset-0 bg-white/60" />
+      {/* Layer 2: Overlay + backdrop blur (soften image without hiding it) */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-white/50"
+        style={{ backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+      />
 
       <div className="relative z-10 w-full max-w-md animate-fade-up">
         <div className="flex justify-center mb-8">

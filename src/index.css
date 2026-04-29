@@ -112,6 +112,34 @@
   .bg-chat {
     background: var(--chat-bg);
   }
+  .glass-ai {
+    background: hsl(0 0% 100% / 0.45);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.55);
+    box-shadow: 0 8px 32px -12px hsl(210 40% 50% / 0.18);
+  }
+  .dark .glass-ai {
+    background: hsl(215 35% 18% / 0.55);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+  }
+  .glass-user {
+    background: linear-gradient(135deg, hsl(201 96% 92%) 0%, hsl(199 100% 86%) 100%);
+    border: 1px solid hsl(201 96% 75% / 0.35);
+    box-shadow: 0 6px 20px -10px hsl(201 90% 55% / 0.35);
+  }
+  .dark .glass-user {
+    background: linear-gradient(135deg, hsl(201 70% 30%) 0%, hsl(210 70% 25%) 100%);
+    border: 1px solid hsl(201 80% 50% / 0.3);
+  }
+  .prose-chat p { margin: 0 0 0.6em 0; line-height: 1.7; }
+  .prose-chat p:last-child { margin-bottom: 0; }
+  .prose-chat strong { font-weight: 600; }
+  .prose-chat ul, .prose-chat ol { margin: 0.4em 0 0.6em 1.25em; line-height: 1.7; }
+  .prose-chat ul { list-style: disc; }
+  .prose-chat ol { list-style: decimal; }
+  .prose-chat li { margin: 0.15em 0; }
+  .prose-chat code { background: hsl(var(--muted)); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.9em; }
   .bg-gradient-primary {
     background: var(--gradient-primary);
   }

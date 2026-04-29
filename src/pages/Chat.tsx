@@ -466,7 +466,7 @@ const Chat = () => {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-chat overflow-hidden">
+    <div className="h-screen flex flex-col bg-wellness-chat overflow-hidden">
       {/* Top Nav */}
       <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-card/80 backdrop-blur-md border-b border-border z-10">
         <div className="flex items-center gap-3">

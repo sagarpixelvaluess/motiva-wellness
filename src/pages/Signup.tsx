@@ -37,15 +37,15 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
-      <header className="flex items-center justify-between px-6 py-4 sm:px-10">
+    <div className="relative min-h-screen bg-wellness wellness-orbs overflow-hidden">
+      <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-10">
         <MotivaLogo size="md" />
         <button className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-smooth shadow-soft">
           <HelpCircle className="w-5 h-5" />
         </button>
       </header>
 
-      <div className="flex flex-col items-center justify-center px-6 py-8">
+      <div className="relative z-10 flex flex-col items-center justify-center px-6 py-8">
         <div className="w-full max-w-md animate-fade-up">
           <div className="bg-card rounded-3xl shadow-card p-8 sm:p-10">
             <div className="text-center mb-8">

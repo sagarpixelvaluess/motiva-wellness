@@ -36,8 +36,8 @@ const Welcome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft flex flex-col">
-      <header className="flex items-center justify-between px-6 py-4 sm:px-10">
+    <div className="relative min-h-screen bg-wellness-sunrise wellness-orbs flex flex-col overflow-hidden">
+      <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-10">
         <MotivaLogo size="md" />
         <div className="flex items-center gap-3">
           <button className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-muted-foreground hover:text-primary transition-smooth shadow-soft">

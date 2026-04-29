@@ -33,8 +33,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-soft p-6">
-      <div className="w-full max-w-md animate-fade-up">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-wellness wellness-orbs p-6 overflow-hidden">
+      <div className="relative z-10 w-full max-w-md animate-fade-up">
         <div className="flex justify-center mb-8">
           <MotivaLogo size="lg" />
         </div>

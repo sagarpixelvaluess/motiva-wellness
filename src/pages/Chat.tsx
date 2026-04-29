@@ -560,7 +560,7 @@ const Chat = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-5 pb-4">
+                <div className="space-y-6 pb-4">
                   <div className="flex justify-center">
                     <span className="text-xs font-semibold tracking-widest text-primary uppercase bg-primary/10 px-4 py-1.5 rounded-full">
                       Today

@@ -560,7 +560,7 @@ const Chat = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-5 pb-4">
+                <div className="space-y-6 pb-4">
                   <div className="flex justify-center">
                     <span className="text-xs font-semibold tracking-widest text-primary uppercase bg-primary/10 px-4 py-1.5 rounded-full">
                       Today
@@ -676,6 +676,65 @@ const Chat = () => {
   );
 };
 
+// Lightweight inline formatter: **bold**, lists, paragraphs
+const renderFormatted = (text: string) => {
+  const lines = text.split("\n");
+  const blocks: JSX.Element[] = [];
+  let listBuf: { type: "ul" | "ol"; items: string[] } | null = null;
+  let paraBuf: string[] = [];
+
+  const flushPara = (key: string) => {
+    if (paraBuf.length) {
+      blocks.push(<p key={key}>{renderInline(paraBuf.join(" "))}</p>);
+      paraBuf = [];
+    }
+  };
+  const flushList = (key: string) => {
+    if (listBuf) {
+      const Tag = listBuf.type;
+      blocks.push(
+        <Tag key={key}>
+          {listBuf.items.map((it, i) => (
+            <li key={i}>{renderInline(it)}</li>
+          ))}
+        </Tag>
+      );
+      listBuf = null;
+    }
+  };
+
+  lines.forEach((raw, i) => {
+    const line = raw.trimEnd();
+    const ulMatch = line.match(/^\s*[-*]\s+(.*)/);
+    const olMatch = line.match(/^\s*\d+\.\s+(.*)/);
+    if (ulMatch) {
+      flushPara(`p-${i}`);
+      if (!listBuf || listBuf.type !== "ul") { flushList(`l-${i}`); listBuf = { type: "ul", items: [] }; }
+      listBuf.items.push(ulMatch[1]);
+    } else if (olMatch) {
+      flushPara(`p-${i}`);
+      if (!listBuf || listBuf.type !== "ol") { flushList(`l-${i}`); listBuf = { type: "ol", items: [] }; }
+      listBuf.items.push(olMatch[1]);
+    } else if (line.trim() === "") {
+      flushPara(`p-${i}`);
+      flushList(`l-${i}`);
+    } else {
+      flushList(`l-${i}`);
+      paraBuf.push(line);
+    }
+  });
+  flushPara("p-end");
+  flushList("l-end");
+  return blocks;
+};
+
+const renderInline = (text: string) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) =>
+    p.startsWith("**") && p.endsWith("**") ? <strong key={i}>{p.slice(2, -2)}</strong> : <span key={i}>{p}</span>
+  );
+};
+
 const MessageBubble = ({
   message,
   saved,
@@ -693,15 +752,15 @@ const MessageBubble = ({
   const isStreaming = message.id.startsWith("ai-temp") || message.id.startsWith("temp");
 
   return (
-    <div className={cn("flex animate-bubble-in group", isUser ? "justify-end" : "justify-start")}>
-      <div className={cn("flex items-end gap-2 max-w-[90%] sm:max-w-[80%]", isUser ? "flex-row-reverse" : "flex-row")}>
+    <div className={cn("flex animate-fade-up group", isUser ? "justify-end" : "justify-start")}>
+      <div className={cn("flex items-start gap-2 max-w-[88%] sm:max-w-[78%]", isUser ? "flex-row-reverse" : "flex-row")}>
         <div
           className={cn(
-            "shadow-bubble relative overflow-hidden",
+            "relative rounded-2xl",
             isUser
-              ? "bg-bubble-user text-bubble-user-foreground rounded-3xl rounded-br-md"
-              : "bg-bubble-ai text-bubble-ai-foreground rounded-3xl rounded-bl-md border-l-2 border-primary/40",
-            hasImage && !hasText ? "p-1.5" : "px-5 py-3.5"
+              ? "glass-user text-foreground rounded-br-md"
+              : "glass-ai text-foreground rounded-bl-md",
+            hasImage && !hasText ? "p-1.5" : "px-4 py-3"
           )}
         >
           {hasImage && (
@@ -709,19 +768,19 @@ const MessageBubble = ({
               href={message.image_url!}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn("block", hasText && "mb-2 -mx-2 -mt-1")}
+              className={cn("block", hasText && "mb-2")}
             >
               <img
                 src={message.image_url!}
                 alt="Attached"
                 loading="lazy"
-                className="rounded-2xl max-h-72 w-auto object-cover"
+                className="rounded-xl max-h-72 w-auto object-cover"
               />
             </a>
           )}
           {hasText && (
-            <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-              {message.text}
+            <div className="prose-chat text-[15px]">
+              {renderFormatted(message.text)}
             </div>
           )}
           {!hasText && !hasImage && (
@@ -729,7 +788,7 @@ const MessageBubble = ({
           )}
           <div
             className={cn(
-              "text-[10px] mt-1.5 tracking-wider uppercase opacity-60",
+              "text-[10px] mt-1.5 tracking-wider uppercase opacity-50",
               isUser ? "text-right" : "text-left",
               hasImage && !hasText && "px-2 pb-1"
             )}
@@ -742,11 +801,11 @@ const MessageBubble = ({
             onClick={onToggleBookmark}
             aria-label={saved ? "Remove bookmark" : "Save to Library"}
             className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-smooth mb-1",
+              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-smooth mt-1",
               "opacity-0 group-hover:opacity-100 focus:opacity-100",
               saved
                 ? "bg-primary/15 text-primary opacity-100"
-                : "bg-card text-muted-foreground hover:text-primary hover:bg-primary/10 shadow-bubble"
+                : "bg-card/70 backdrop-blur text-muted-foreground hover:text-primary hover:bg-primary/10"
             )}
           >
             {saved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
@@ -758,8 +817,8 @@ const MessageBubble = ({
 };
 
 const TypingIndicator = () => (
-  <div className="flex animate-bubble-in">
-    <div className="bg-bubble-ai rounded-3xl rounded-bl-md px-5 py-3.5 shadow-bubble flex items-center gap-2">
+  <div className="flex animate-fade-up justify-start">
+    <div className="glass-ai rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
       <div className="flex gap-1">
         <span className="w-2 h-2 rounded-full bg-primary animate-typing-dot" style={{ animationDelay: "0s" }} />
         <span className="w-2 h-2 rounded-full bg-primary animate-typing-dot" style={{ animationDelay: "0.15s" }} />

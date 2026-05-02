@@ -6,6 +6,7 @@ import { MotivaLogo } from "@/components/MotivaLogo";
 import { Button } from "@/components/ui/button";
 import { Bell, Sparkles, Lock, MessageCircle, Shield, User as UserIcon } from "lucide-react";
 import { UserAvatar } from "@/components/UserAvatar";
+import oceanBg from "@/assets/welcome-ocean.jpg";
 
 const Welcome = () => {
   const { user } = useAuth();
@@ -36,7 +37,22 @@ const Welcome = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-wellness-sunrise wellness-orbs flex flex-col overflow-hidden">
+    <div className="relative min-h-screen flex flex-col overflow-hidden animate-fade-up">
+      {/* Layer 1: Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${oceanBg})`, zIndex: -2 }}
+      />
+      {/* Layer 2: Soft white overlay + blur */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.75))",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          zIndex: -1,
+        }}
+      />
       <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-10">
         <MotivaLogo size="md" />
         <div className="flex items-center gap-3">
@@ -50,7 +66,15 @@ const Welcome = () => {
 
       <div className="relative z-10 flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md animate-fade-up">
-          <div className="bg-card rounded-3xl shadow-card p-8 sm:p-10">
+          <div
+            className="rounded-3xl p-8 sm:p-10 border border-white/60"
+            style={{
+              background: "rgba(255,255,255,0.75)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+            }}
+          >
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow animate-float">

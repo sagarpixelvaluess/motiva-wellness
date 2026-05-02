@@ -608,7 +608,7 @@ const Chat = () => {
           </div>
 
           {/* Input */}
-          <div className="px-4 sm:px-6 pb-6 pt-2">
+          <div className="px-4 sm:px-6 pb-6 pt-2 relative" style={{ zIndex: 1 }}>
             <div className="max-w-3xl mx-auto">
               <input
                 ref={fileInputRef}

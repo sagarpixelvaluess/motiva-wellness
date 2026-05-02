@@ -581,7 +581,17 @@ const Chat = () => {
               ) : (
                 <div className="space-y-6 pb-4">
                   <div className="flex justify-center">
-                    <span className="text-xs font-semibold tracking-widest text-primary uppercase bg-primary/10 px-4 py-1.5 rounded-full">
+                    <span
+                      className="text-xs font-extrabold uppercase px-4 py-1.5 rounded-full border border-white/60"
+                      style={{
+                        color: "#0A2540",
+                        letterSpacing: "1.5px",
+                        background: "rgba(255,255,255,0.5)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                        textShadow: "0px 2px 8px rgba(0,0,0,0.25)",
+                      }}
+                    >
                       Today
                     </span>
                   </div>
@@ -689,9 +699,23 @@ const Chat = () => {
                   )}
                 </Button>
               </div>
-              <p className="text-center text-[10px] tracking-widest text-muted-foreground uppercase mt-3">
-                Motiva can provide support but not medical advice
-              </p>
+              <div className="flex justify-center mt-3">
+                <p
+                  className="text-[10px] uppercase font-semibold"
+                  style={{
+                    color: "#2c3e50",
+                    letterSpacing: "1.5px",
+                    background: "rgba(255,255,255,0.6)",
+                    backdropFilter: "blur(6px)",
+                    WebkitBackdropFilter: "blur(6px)",
+                    padding: "6px 12px",
+                    borderRadius: "10px",
+                    textShadow: "0px 1px 4px rgba(0,0,0,0.15)",
+                  }}
+                >
+                  Motiva can provide support but not medical advice
+                </p>
+              </div>
             </div>
           </div>
         </main>

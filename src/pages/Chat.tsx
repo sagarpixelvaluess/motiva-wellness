@@ -538,20 +538,18 @@ const Chat = () => {
         {/* Chat Area */}
         <main className="flex-1 flex flex-col overflow-hidden relative">
           <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 relative animate-fade-up">
-            {/* Layer 1: Ocean background image */}
+            {/* Layer 1: Ocean background image (clearly visible) */}
             <div
-              className="pointer-events-none fixed inset-0 bg-cover bg-center"
+              className="pointer-events-none fixed inset-0 bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: `url(${chatOceanBg})`, zIndex: 0 }}
               aria-hidden
             />
-            {/* Layer 2: Soft overlay for readability */}
+            {/* Layer 2: Very light gradient for top/bottom readability */}
             <div
               className="pointer-events-none fixed inset-0"
               style={{
                 background:
-                  "linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.9))",
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
+                  "linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.1))",
                 zIndex: 0,
               }}
               aria-hidden

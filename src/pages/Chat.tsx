@@ -699,9 +699,23 @@ const Chat = () => {
                   )}
                 </Button>
               </div>
-              <p className="text-center text-[10px] tracking-widest text-muted-foreground uppercase mt-3">
-                Motiva can provide support but not medical advice
-              </p>
+              <div className="flex justify-center mt-3">
+                <p
+                  className="text-[10px] uppercase font-semibold"
+                  style={{
+                    color: "#2c3e50",
+                    letterSpacing: "1.5px",
+                    background: "rgba(255,255,255,0.6)",
+                    backdropFilter: "blur(6px)",
+                    WebkitBackdropFilter: "blur(6px)",
+                    padding: "6px 12px",
+                    borderRadius: "10px",
+                    textShadow: "0px 1px 4px rgba(0,0,0,0.15)",
+                  }}
+                >
+                  Motiva can provide support but not medical advice
+                </p>
+              </div>
             </div>
           </div>
         </main>

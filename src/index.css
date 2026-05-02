@@ -158,11 +158,11 @@
     background: var(--chat-bg);
   }
   .glass-ai {
-    background: hsl(0 0% 100% / 0.75);
-    backdrop-filter: blur(8px) saturate(160%);
-    -webkit-backdrop-filter: blur(8px) saturate(160%);
-    border: 1px solid hsl(0 0% 100% / 0.6);
-    box-shadow: 0 6px 24px -12px hsl(210 40% 50% / 0.18);
+    background: hsl(0 0% 100% / 0.85);
+    backdrop-filter: blur(3px) saturate(140%);
+    -webkit-backdrop-filter: blur(3px) saturate(140%);
+    border: 1px solid hsl(0 0% 100% / 0.7);
+    box-shadow: 0 6px 24px -12px hsl(210 40% 50% / 0.2);
   }
   .dark .glass-ai {
     background: hsl(215 35% 18% / 0.7);
